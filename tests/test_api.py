@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from extractor_service import main
 from extractor_service.admission import Admission
 from extractor_service.config import settings
+from tests.pdf_factory import build_pdf
 
 
 @pytest.fixture(scope="module")
@@ -22,14 +23,27 @@ def post_pdf(client):
     return post
 
 
-def test_extract_returns_content_and_page_count(post_pdf, text_pdf):
+def test_extract_returns_content_page_count_and_metadata(post_pdf, text_pdf):
     response = post_pdf(text_pdf)
 
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == {"content", "page_count"}
+    assert set(body) == {"content", "page_count", "metadata"}
     assert "Hola mundo" in body["content"]
     assert body["page_count"] == 1
+    assert body["metadata"] == {}
+
+
+def test_extract_returns_the_pdf_metadata(post_pdf):
+    pdf = build_pdf("Hola", info={"Author": "Ana Perez", "CreationDate": "D:20261120120000Z"})
+
+    response = post_pdf(pdf)
+
+    assert response.status_code == 200
+    assert response.json()["metadata"] == {
+        "author": "Ana Perez",
+        "creationdate": "D:20261120120000Z",
+    }
 
 
 def test_invalid_pdf_returns_422(post_pdf):

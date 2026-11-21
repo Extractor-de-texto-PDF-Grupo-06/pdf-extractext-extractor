@@ -17,7 +17,7 @@ def test_second_upload_is_received_while_first_pdf_is_processing(monkeypatch):
         first_result = loop.create_future()
         processing = asyncio.Event()
         received = asyncio.Event()
-        result = ExtractionResult(content="text", page_count=1)
+        result = ExtractionResult(content="text", page_count=1, metadata={})
 
         async def extract(data):
             if not processing.is_set():
@@ -43,7 +43,7 @@ def test_second_upload_is_received_while_first_pdf_is_processing(monkeypatch):
         finally:
             first_result.set_result(result)
             responses = await asyncio.gather(first, second)
-        assert responses == [{"content": "text", "page_count": 1}] * 2
+        assert responses == [{"content": "text", "page_count": 1, "metadata": {}}] * 2
 
     asyncio.run(scenario())
 
