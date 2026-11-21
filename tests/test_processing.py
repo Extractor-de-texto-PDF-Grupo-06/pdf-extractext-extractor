@@ -31,7 +31,7 @@ def test_cancelled_request_keeps_worker_and_buffer_reserved(monkeypatch):
             with pytest.raises(Saturated):
                 await pool.extract(b"%PDF second")
             assert bytes(pool._memory.buf[:10]) == b"%PDF first"
-            running.set_result(ExtractionResult("first", 1))
+            running.set_result(ExtractionResult("first", 1, {}))
             await asyncio.sleep(0)
             result = await pool.extract(b"%PDF second")
             assert result.page_count == 1

@@ -16,6 +16,10 @@ import pymupdf
 _HEADING_RATIO = 1.5
 _SUBHEADING_RATIO = 1.2
 _TEXT_FLAGS = pymupdf.TEXT_PRESERVE_WHITESPACE | pymupdf.TEXT_MEDIABOX_CLIP
+# Campos del diccionario de información del PDF, con el nombre que les da PyMuPDF.
+_METADATA_FIELDS = (
+    "title", "author", "subject", "keywords", "creator", "producer", "creationDate", "modDate",
+)
 
 
 class PDFValidationError(ValueError):
@@ -26,6 +30,7 @@ class PDFValidationError(ValueError):
 class ExtractionResult:
     content: str
     page_count: int
+    metadata: dict[str, str]
 
 
 def extract(data: bytes) -> ExtractionResult:
@@ -66,7 +71,17 @@ def extract(data: bytes) -> ExtractionResult:
             elif bold:
                 text = f"**{text}**"
             paragraphs.append(text)
-        return ExtractionResult(content="\n\n".join(paragraphs), page_count=doc.page_count)
+        return ExtractionResult(
+            content="\n\n".join(paragraphs),
+            page_count=doc.page_count,
+            metadata=_metadata(doc),
+        )
+
+
+def _metadata(doc: pymupdf.Document) -> dict[str, str]:
+    """Los metadatos que el PDF declara, con las claves en minúsculas (creationDate → creationdate)."""
+    declared = doc.metadata or {}
+    return {name.lower(): declared[name] for name in _METADATA_FIELDS if declared.get(name)}
 
 
 def _open(data: bytes) -> pymupdf.Document:
