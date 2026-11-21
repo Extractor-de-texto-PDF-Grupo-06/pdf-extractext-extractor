@@ -16,13 +16,23 @@ Es el formato que envían los scripts de k6 y Vegeta de la cátedra.
 ```json
 {
   "content": "# Título\n\nTexto del documento...",
-  "page_count": 12
+  "page_count": 12,
+  "metadata": {
+    "author": "Kristen White",
+    "title": "2020 Scrum Guide",
+    "creationdate": "D:20201109152822-05'00'"
+  }
 }
 ```
 
 - `content`: texto del PDF en formato Markdown. Puede ser `""` si el PDF no tiene
   texto seleccionable (por ejemplo, un PDF escaneado sin OCR).
 - `page_count`: entero, mayor o igual a 1.
+- `metadata`: lo que el PDF declara sobre sí mismo. Las claves posibles son `title`,
+  `author`, `subject`, `keywords`, `creator`, `producer`, `creationdate` y `moddate`;
+  solo aparecen las que el PDF trae, así que puede ser `{}`. Las fechas van tal como
+  las guarda el PDF (`D:AAAAMMDDHHmmSS…`). Es un campo agregado: los scripts de carga
+  del TP no lo leen y siguen funcionando igual.
 
 ### Errores
 | Situación                         | Código | Cuerpo                                         |
