@@ -64,12 +64,12 @@ en el executor ni se sobrescribe un PDF que todavía se está leyendo.
 - El extractor valida el contenido: tamaño, firma `%PDF`, integridad y que no
   requiera contraseña de apertura. Los PDFs con restricciones de propietario pero
   sin clave de apertura se aceptan.
-- La extensión `.pdf` y el content-type los valida quien llama (documents-service).
+- La extensión `.pdf` y el content-type los valida quien llama (web).
 
 ## Ejecución
-- Escucha en el puerto **8000** dentro del contenedor.
-- La imagen incluye Python: el healthcheck de `docker-compose.yml` llama a `/health`
-  con `python -c`.
+- Escucha en el puerto de `PORT` (8000 por defecto) dentro del contenedor.
+- La imagen corre con el usuario sin privilegios `10001` y declara un `HEALTHCHECK`
+  que llama a `/health` con `python -c`.
 - Configuración por variables de entorno (por ejemplo, `MAX_FILE_SIZE_MB`, por
   defecto 10) y logs a stdout.
 - Sin estado: cualquier réplica puede atender cualquier petición.
