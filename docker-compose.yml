@@ -6,12 +6,19 @@ services:
   # Se accede sólo a través de extractor-lb.
   extractor:
     build: .
-    command: ["uvicorn", "extractor_service.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "60", "--no-access-log"]
     environment:
-      # Sin valor: se pasa sólo si está definida en el host; si no, rige el
-      # valor por defecto de extractor_service/config.py.
+      # Sin valor: se pasa sólo si está definida en el host o en .env; si no,
+      # rige el valor por defecto de extractor_service/config.py.
+      - MAX_FILE_SIZE_MB
+      - WORKERS
+      - MAX_INFLIGHT
       - QUEUE_TIMEOUT_S
       - REQUEST_TIMEOUT_S
+      # Ajustes de uvicorn para la carga: nginx reutiliza las conexiones y el
+      # log de cada pedido cuesta CPU.
+      - UVICORN_TIMEOUT_KEEP_ALIVE=60
+      - UVICORN_ACCESS_LOG=false
+      # PORT queda en 8000 (el valor de la imagen): nginx/nginx.conf apunta ahí.
     deploy:
       # El TP permite hasta 5 réplicas; variable para comparar escenarios.
       replicas: ${EXTRACTOR_REPLICAS:-5}
@@ -20,11 +27,7 @@ services:
         limits:
           cpus: "1.0"
           memory: 1G
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    # El healthcheck lo declara la imagen (Dockerfile).
     restart: unless-stopped
 
   extractor-lb:

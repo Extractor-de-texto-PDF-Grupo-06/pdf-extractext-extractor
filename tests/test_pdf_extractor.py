@@ -38,6 +38,40 @@ class TestExtract:
         assert result.content == ""
         assert result.page_count == 1
 
+    def test_returns_the_metadata_declared_by_the_pdf(self):
+        pdf = build_pdf(
+            "Hola",
+            info={
+                "Author": "Ana Perez",
+                "Title": "Informe final",
+                "Subject": "Pruebas",
+                "Keywords": "pdf, texto",
+                "Creator": "Writer",
+                "Producer": "LibreOffice",
+                "CreationDate": "D:20261120120000Z",
+                "ModDate": "D:20261121090000Z",
+            },
+        )
+
+        assert extract(pdf).metadata == {
+            "author": "Ana Perez",
+            "title": "Informe final",
+            "subject": "Pruebas",
+            "keywords": "pdf, texto",
+            "creator": "Writer",
+            "producer": "LibreOffice",
+            "creationdate": "D:20261120120000Z",
+            "moddate": "D:20261121090000Z",
+        }
+
+    def test_returns_only_the_metadata_fields_the_pdf_has(self):
+        pdf = build_pdf("Hola", info={"Author": "Ana Perez", "Title": ""})
+
+        assert extract(pdf).metadata == {"author": "Ana Perez"}
+
+    def test_pdf_without_metadata_returns_empty_metadata(self, text_pdf):
+        assert extract(text_pdf).metadata == {}
+
     def test_accepts_pdf_with_owner_restrictions_only(self, owner_restricted_pdf):
         assert extract(owner_restricted_pdf).page_count == 1
 
