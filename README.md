@@ -100,6 +100,18 @@ los nuestros, alcanza con apuntarlos a `http://localhost:8080/extract`.
   `uv.lock`, proceso sin estado que escala por réplicas, logs a stdout.
 - **TDD, KISS, YAGNI, DRY y SOLID.**
 
+## Seguridad de la imagen
+
+El escaneo Trivy 0.76.2 del 22/11/2026 sobre Debian 13.8 encontró 12 CVE de severidad alta
+sin versión corregida disponible en Debian y ninguna crítica: CVE-2025-69720,
+CVE-2026-119373, CVE-2026-119374, CVE-2026-119379, CVE-2026-124709, CVE-2026-16742,
+CVE-2026-54369, CVE-2026-76642, CVE-2026-78408, CVE-2026-78409, CVE-2026-78410 y
+CVE-2026-9538. Afectan paquetes del sistema base (ncurses, SQLite, OpenSSL, systemd,
+acl, util-linux y Perl), no dependencias Python de la aplicación. La imagen ejecuta como
+UID 10001 y, en orchestration, Compose aplica `read_only`, `cap_drop: [ALL]` y
+`no-new-privileges:true`. La CI ignora solo hallazgos sin corrección publicada; cuando
+Trivy detecte una versión corregida, el hallazgo vuelve a bloquearla.
+
 ## Licencia
 
 MIT © 2026 — Universidad Tecnológica Nacional
